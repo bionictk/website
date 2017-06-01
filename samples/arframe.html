@@ -42,6 +42,14 @@
 
 <body>
   <ar-scene>
+      <ar-frame id="viewer" visible="true" parent="ar.stageEUS">
+        <a-entity id="helloworld" position="0 0 -8">
+          <a-sphere position="0 1.25 -1" cursor-listener radius="1.25" color="#EF2D5E" ></a-sphere>
+          <a-box position="-1 0.5 1" cursor-listener rotation="0 45 0" width="1" height="1" depth="1"  color="#4CC3D9" ></a-box>
+          <a-cylinder position="1 0.75 1" cursor-listener radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+          <a-plane rotation="-90 0 0" cursor-listener width="4" height="4" color="#7BC8A4"></a-plane>
+        </a-entity>
+      </ar-frame>
            <!-- ambient light doesn't need to be attached -->'
       <a-entity light="type: ambient; color: #444"></a-entity>
 
@@ -60,7 +68,21 @@
       <!-- Sky -->
       <!--<a-sky color="#c8f8e0"></a-sky>-->
   </ar-scene>
-  <script>
+      <script>
+
+      var arScene = document.querySelector('ar-scene');
+      var content = document.querySelector('#helloworld');
+
+      // the ar-camera has an argon reference frame attached, so when it gets it's first value,
+      // we'll get this event 
+      arScene.addEventListener("referenceframe-statuschanged", function () {
+        var camera = document.querySelector('ar-camera');
+        var vec = camera.object3D.getWorldDirection();
+        vec.multiplyScalar(-10);
+        content.setAttribute("position", {x: vec.x, y: vec.y, z: vec.z});
+      })
+    </script>
+  <!--<script>
     
     // fake data
     var data = [ 10, 20, 30, 15, 25, 35, 40,
@@ -128,7 +150,7 @@
     //   })
     // })    
     
-  </script>
+  </script>-->
 </body>
 
 
