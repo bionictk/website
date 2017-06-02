@@ -1,6 +1,6 @@
 <html>
 <head>
-	<!--Based on the Argon Aframe basic sample and Ian Johnson's code from https://bl.ocks.org/enjalot/8be32e6f1f32920ba841-->
+    <!--Based on the Argon Aframe vuforia sample and Ian Johnson's code from https://bl.ocks.org/enjalot/8be32e6f1f32920ba841-->
 	<meta charset="utf-8">
 	<title>ARInfoVis</title>
 	<meta name="keywords" content="argon, aframe, augmented reality, web, javascript, vuforia, d3, infovis">
@@ -19,15 +19,16 @@
 </head>
 
 <body>
-	<ar-scene sunmoon light="defaultLightsEnabled: false">
+    <div hidden>
+        <div id="lookattarget" class="bottomScreen">Look at the "stones" target ...</div>
+    </div> 
+	<ar-scene vuforiakey="#vuforiakey"
+              vuforiadataset__stonesandchips="src:url(https://aframe.argonjs.io/resources/datasets/StonesAndChips.xml);">
 
 		<!-- everything has to be attached to some reference frame -->
-		<ar-frame id="viewer" visible="true" parent="ar.stageEUS">
+        <ar-frame id="frame" trackvisibility="true" visible="false" parent="vuforia.stonesandchips.stones" position="0 0 0" rotation="0 0 0">
 			<a-entity id="helloworld" position="0 0 -8">
-				<!--<a-sphere position="0 1.25 -1" cursor-listener radius="1.25" color="#EF2D5E" ></a-sphere>
-        <a-box position="-1 0.5 1" cursor-listener rotation="0 45 0" width="1" height="1" depth="1"  color="#4CC3D9" ></a-box>
-        <a-cylinder position="1 0.75 1" cursor-listener radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-        <a-plane rotation="-90 0 0" cursor-listener width="4" height="4" color="#7BC8A4"></a-plane>-->
+		        <a-plane rotation="-90 0 0" cursor-listener width="4" height="4" color="#7BC8A4"></a-plane>
 			</a-entity>
 		</ar-frame>
 
@@ -109,6 +110,50 @@
 			//metalness: function(d,i) { return i/data.length}
 		})
 	</script>
+
+    <script>
+        var arScene = document.querySelector('ar-scene');
+        var frame = document.querySelector("#frame");
+        var content = document.querySelector('#helloworld');
+
+        var hudElem = document.querySelector("#lookattarget");
+        var hudElem2 = hudElem.cloneNode( true );
+        hudElem2.id = hudElem.id + "2";
+
+        arScene.addEventListener('argon-vuforia-dataset-loaded', function(evt) {
+            // hudElem.style.display = 'inline-block'; // start hidden
+            arScene.hud.appendChild(hudElem, hudElem2);
+
+            frame.addEventListener('referenceframe-statuschanged', function(evt) {
+                if (evt.detail.found) {
+                    hudElem.classList.add("hide");
+                    hudElem2.classList.add("hide");
+                    // hudElem.style.display = 'none'; // hide when target seen
+                    // hudElem2.style.display = 'none'; // hide when target seen
+                } else {
+                    hudElem.classList.remove("hide");
+                    hudElem2.classList.remove("hide");
+                    // hudElem.style.display = 'inline-block'; // show when target lost
+                    // hudElem2.style.display = 'inline-block'; // hide when target seen
+                }
+            });
+        });
+
+        arScene.addEventListener('argon-vuforia-not-available', function(evt) {
+            frame.setAttribute("trackvisibility", false);
+            frame.setAttribute("visible", true);
+            frame.setAttribute("parent", "ar.stage")
+            content.setAttribute("rotation", {x: -90, y: 0, z: 0});
+            content.setAttribute("position", {x: 0, y: 0, z: 0});
+            content.setAttribute("scale", {x: 20, y: 20, z: 20});
+
+            hudElem.innerHTML = "No Vuforia. Showing scene that would be on the target."
+            hudElem2.innerHTML = "No Vuforia. Showing scene that would be on the target."
+            //hudElem.style.display = 'inline-block'; // show when target lost
+            arScene.hud.appendChild(hudElem, hudElem2);
+
+        });
+    </script>
 </body>
 
 </html>
